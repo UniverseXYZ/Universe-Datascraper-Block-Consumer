@@ -1,0 +1,220 @@
+@testnet = https://orderbook.marketplace-api.universe.xyz
+@mainnethost = 
+@localhost = http://localhost:8080
+@hostname = {{localhost}}
+
+
+### Health check
+GET {{hostname}}/v1/health
+Content-Type: application/json
+
+### Query Order
+Get {{hostname}}/v1/orders
+?collection=0x78c3E13fdDC49f89feEB54C3FC47d7df611FA9BE
+&side=1
+content-type: application/json
+
+
+### Get Order by hash
+Get {{hostname}}/v1/orders/0x30aeb762c2b719c1c53ef82cf9ca5c45d34bac200e8a79a5bc179f1ac7945dd7
+
+### Prepare Order Execution
+Post {{hostname}}/v1/orders/0x30aeb762c2b719c1c53ef82cf9ca5c45d34bac200e8a79a5bc179f1ac7945dd7/prepare
+Content-Type: application/json
+
+{
+  "maker": "0xa035F2A1fC34fec7EfbD2E9cA2d567c5Cc001d91",
+  "amount": "1"
+}
+
+
+### Encode or Create Seller Order
+POST {{hostname}}/v1/orders/order
+Content-Type: application/json
+
+{
+  "type": "UNIVERSE_V1",
+  "maker": "0xE1d7a59AB392EA29b059dAE31c5A573e2fEcC5A8",
+  "taker": "0x0000000000000000000000000000000000000000",
+  "make": {
+    "assetType": {
+      "assetClass": "ERC721",
+      "contract": "0x04dCA48CBFd79287686F3Db03DC4EFEbC5266677",
+      "tokenId": 9
+    },
+    "value": "1"
+  },
+  "take": {
+    "assetType": {
+      "assetClass": "ETH"
+    },
+    "value": "100000000000000000"
+  },
+  "salt": 1,
+  "start": 0,
+  "end": 0,
+  "data": {
+    "dataType": "ORDER_DATA",
+    "revenueSplits": [
+      {
+        "account": "0x3bB0dE46c6B1501aF5921Fb7EDBc15dFD998Fadd",
+        "value": "5000"
+      }
+    ]
+  },
+  "signature": "0x1d8ab6fddf972cf57b7cfa5359690bd6541d33eb73cd866f1b573a117a49498758b8b79f03ccf819d4f191b27da34dff3adf8a2e7defa6bb287dec7dc4e5eaa91b"
+}
+
+### Encode or Create Sell Bundle
+POST {{hostname}}/v1/orders/order
+Content-Type: application/json
+
+{
+  "type": "UNIVERSE_V1",
+  "maker": "0xa035F2A1fC34fec7EfbD2E9cA2d567c5Cc001d91",
+  "taker": "0x0000000000000000000000000000000000000000",
+  "make": {
+    "assetType": {
+      "assetClass": "ERC721_BUNDLE",
+      "contracts": ["0x78c3E13fdDC49f89feEB54C3FC47d7df611FA9BE"],
+      "tokenIds": [[1, 2, 3]]
+    },
+    "value": "3"
+  },
+  "take": {
+    "assetType": {
+      "assetClass": "ETH"
+    },
+    "value": "300000000000000000"
+  },
+  "salt": 5,
+  "start": 0,
+  "end": 0,
+  "data": {
+    "dataType": "ORDER_DATA",
+    "revenueSplits": [
+      {
+        "account": "0x3bB0dE46c6B1501aF5921Fb7EDBc15dFD998Fadd",
+        "value": "1000"
+      }
+    ]
+  },
+  "signature": "0x5e21870c8d65761d682ee969a5017b5cd305e7f78a22829c589a26e23c3d870d0f501a5d8c7ed900114a3cb7c0a74b06e5458ba3ca50844925f55ab23786b2531c"
+}
+
+### Encode or Create Buy Order
+POST {{hostname}}/v1/orders/order
+Content-Type: application/json
+
+{
+  "type": "UNIVERSE_V1",
+  "maker": "0xa035F2A1fC34fec7EfbD2E9cA2d567c5Cc001d91",
+  "taker": "0x0000000000000000000000000000000000000000",
+  "take": {
+    "assetType": {
+      "assetClass": "ERC721",
+      "contract": "0x78c3E13fdDC49f89feEB54C3FC47d7df611FA9BE",
+      "tokenId": 5
+    },
+    "value": "1"
+  },
+  "make": {
+    "assetType": {
+      "assetClass": "ERC20",
+      "contract": "0x7aD29Fbf3Cfa3F53B9d8a79ea0870b402E642Cac"
+    },
+    "value": "100000000000000000000"
+  },
+  "salt": 5,
+  "start": 0,
+  "end": 0,
+  "data": {
+  },
+  "signature": "0x869161c3ef20ef4769c3e786cd8ff19f5154e90d3aa5d8ce6f6f159c30a05d3271b242675e5f55f93d020a32f55db80dd03b722bbc4088e2b56ac75ebee88d811b"
+}
+
+### Match Order
+PUT {{hostname}}/internal/orders/0x7a711e9b7ee5c5ff8dcb41f0815e9104e7d074b4f153cbbddaef0637276bc0ec/match
+Content-Type: application/json
+
+{
+  "txHash": "",
+  "leftMaker": "",
+  "rightMaker": "",
+  "leftOrderHash": "",
+  "rightOrderHash": "",
+  "newLeftFill": "",
+  "newRightFill": ""
+}
+
+### Cancel Order
+PUT {{hostname}}/internal/orders/track
+Content-Type: application/json
+
+{
+  "blockNum": "",
+  "hash": "",
+  "fromAddress": "0xe1d7a59ab392ea29b059dae31c5a573e2fecc5a8",
+  "toAddress": "",
+  "value": "",
+  "erc721TokenId": "0x3",
+  "erc1155Metadata": "",
+  "asset": "",
+  "category": "",
+  "address": "0x78c3E13fdDC49f89feEB54C3FC47d7df611FA9BE"
+}
+
+### subgraph health
+POST https://api.thegraph.com/index-node/graphql
+Content-Type: application/json
+
+{
+  "query": `{
+  indexingStatusForCurrentVersion(subgraphName: "org/subgraph") {
+    synced
+    health
+    fatalError {
+      message
+      block {
+        number
+        hash
+      }
+      handler
+    }
+    chains {
+      chainHeadBlock {
+        number
+      }
+      latestBlock {
+        number
+      }
+    }
+  }
+}`
+}
+
+### subgraph
+POST https://api.thegraph.com/subgraphs/name/kunone/marketplace-rinkeby-v2
+Content-Type: application/json
+
+{
+  "query": `{
+      orderMatchEntities(first: 1, orderBy: blockNumber, orderDirection: asc, where: {blockNumber_gte: 0}) {
+        id
+        txFrom
+        txValue
+        blockNumber
+        blockTimestamp
+        leftOrderHash
+        rightOrderHash
+        leftMaker
+        rightMaker
+        newLeftFill
+        newRightFill
+        leftAssetClass
+        rightAssetClass
+        leftAssetData
+        rightAssetData
+      } 
+    }`
+}
