@@ -116,32 +116,31 @@ export class SqsConsumerService implements OnModuleInit, OnModuleDestroy {
       contracts.map((contract) => ({
         contractAddress: contract.contractAddress,
         tokenType: contract.tokenType === 'ERC721' ? 'ERC721' : 'ERC1155',
-        createdAtBlock: nftBlockTask.blockNum,
       })),
     );
   }
 
   onError(error: Error, message: AWS.SQS.Message) {
     this.logger.log(`SQS error ${error.message}`);
-    this.handleError(error, message);
+    this.handleError(error, message, 'SQS');
   }
 
   onProcessingError(error: Error, message: AWS.SQS.Message) {
     this.logger.log(`Processing error ${error.message}`);
-    this.handleError(error, message);
+    this.handleError(error, message, 'Processing');
   }
 
   onTimeoutError(error: Error, message: AWS.SQS.Message) {
     this.logger.log(`Timeout error ${error.message}`);
-    this.handleError(error, message);
+    this.handleError(error, message, 'Timeout');
   }
 
   onMessageProcessed(message: AWS.SQS.Message) {
     this.nftBlockTaskService.removeNTFBlockTask(message.MessageId);
-    this.logger.log(`Messages ${message?.MessageId} have been processed `);
+    this.logger.log(`Messages ${message?.MessageId} have been processed`);
   }
 
-  private handleError(error: Error, message: AWS.SQS.Message) {
+  private handleError(error: Error, message: AWS.SQS.Message, type: string) {
     const receivedMessage = JSON.parse(message.Body) as ReceivedMessage;
 
     const nftBlockTask = {
@@ -152,6 +151,9 @@ export class SqsConsumerService implements OnModuleInit, OnModuleDestroy {
     this.nftBlockTaskService.updateNFTBlockTask({
       ...nftBlockTask,
       status: MessageStatus.error,
+      errorMessage:
+        `Error type: [${type}] - ${error.message}` ||
+        `Error type: [${type}] - ${JSON.stringify(error)}`,
     });
     this.deleteMessage(message);
   }
