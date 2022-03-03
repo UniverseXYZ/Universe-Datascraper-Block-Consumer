@@ -46,57 +46,21 @@ export class NFTCollectionService {
   }
 
   public async insertIfNotThere(collections: CreateNFTCollectionDto[]) {
-    const query = {
-      contractAddress: {
-        $in: collections.map((collection) => collection.contractAddress),
-      },
-    };
-
-    const existingCollections = await this.nftCollectionModel.find(query);
-
-    const needToBeUpdated = collections.filter((collection) =>
-      existingCollections.find(
-        (e) => e.createdAtBlock > collection.createdAtBlock,
-      ),
-    );
-    const needToBeInserted = collections.filter(
-      (collection) =>
-        !existingCollections.find(
-          (e) => e.contractAddress === collection.contractAddress,
-        ),
-    );
-
-    if (needToBeInserted.length > 0) {
-      console.log(needToBeInserted);
-      await this.nftCollectionModel.bulkWrite(
-        needToBeInserted.map((collection) => ({
-          updateOne: {
-            filter: {
-              contractAddress: collection.contractAddress,
-            },
-            update: {
-              $set: { ...collection },
-            },
-            upsert: true,
+    await this.nftCollectionModel.bulkWrite(
+      collections.map((collection) => ({
+        updateOne: {
+          filter: {
+            contractAddress: collection.contractAddress,
           },
-        })),
-      );
-    }
-
-    if (needToBeUpdated.length > 0) {
-      await this.nftCollectionModel.bulkWrite(
-        needToBeUpdated.map((collection) => ({
-          updateOne: {
-            filter: {
+          update: {
+            $set: {
               contractAddress: collection.contractAddress,
+              tokenType: collection.tokenType,
             },
-            update: {
-              $set: { createdAtBlock: collection.createdAtBlock },
-            },
-            upsert: false,
           },
-        })),
-      );
-    }
+          upsert: true,
+        },
+      })),
+    );
   }
 }

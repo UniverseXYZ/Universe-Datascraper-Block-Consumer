@@ -19,7 +19,7 @@ export class NFTBlockTaskService {
     this.logger.log(`update task ${task.messageId} status (${task.status})`);
     await this.NFTBlockTaskModel.updateOne(
       { messageId: task.messageId },
-      { $set: { status: task.status } },
+      { $set: { ...task } },
       { upsert: true },
     );
   }
