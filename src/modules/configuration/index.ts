@@ -5,6 +5,7 @@ export default () => ({
   port: process.env.APP_PORT,
   app_env: process.env.APP_ENV,
   ethereum_network: process.env.ETHEREUM_NETWORK,
+  ethereum_quorum: process.env.ETHEREUM_QUORUM,
   session_secret: process.env.SESSION_SECRET,
   infura: {
     project_id: process.env.INFURA_PROJECT_ID,
