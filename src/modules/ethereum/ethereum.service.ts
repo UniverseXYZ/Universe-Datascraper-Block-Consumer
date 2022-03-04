@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { EthereumNetworkType } from './interface';
+import { EthereumNetworkType, InfuraProject, ProviderOptions } from './interface';
 import { ethers } from 'ethers';
 import { ConfigService } from '@nestjs/config';
 
@@ -18,24 +18,31 @@ const ERC165ABI = [
 @Injectable()
 export class EthereumService {
   public ether: ethers.providers.BaseProvider;
-  private readonly logger = new Logger(EthereumService.name);
 
   constructor(private configService: ConfigService) {
-    const key = this.configService.get('ethereum_network');
+    const network: ethers.providers.Networkish = this.configService.get('ethereum_network');
+    const quorum: number = Number(this.configService.get('ethereum_quorum'));
 
-    const projectSecret = this.configService.get('infura.project_secret');
-    const projectId = this.configService.get('infura.project_id');
+    const projectSecret: string = this.configService.get('infura.project_secret');
+    const projectId: string = this.configService.get('infura.project_id');
+    const infura:InfuraProject = projectId && projectSecret
+      ? { projectId, projectSecret }
+      : undefined;
+      
+    const alchemyToken: string = this.configService.get('alchemy_token')
+    const alchemy: string = alchemyToken ? alchemyToken : undefined
 
-    if (!projectSecret || !projectId) {
-      this.logger.log('Infura project id or secret is not defined');
-      throw new Error('Infura project id or secret is not defined');
+    if (!infura && !alchemy) {
+      throw new Error('Infura project id and secret or alchemy token is not defined');
     }
-
-    const ethersProvider = ethers.getDefaultProvider(EthereumNetworkType[key], {
-      infura: {
-        projectId,
-      },
-    });
+        
+    const opts: ProviderOptions = {
+      quorum: quorum,
+      alchemy: alchemy,
+      infura: infura
+    }
+    
+    const ethersProvider: ethers.providers.BaseProvider = ethers.getDefaultProvider(network, opts);
     this.ether = ethersProvider;
   }
 
