@@ -12,6 +12,7 @@ import {
   ReceivedMessage,
   TIMEOUT_EVENT_NAME,
   MESSAGE_PROCESSED_EVENT_NAME,
+  EmptyLogError,
 } from './sqs-consumer.types';
 import { ConfigService } from '@nestjs/config';
 import { EthereumService } from '../ethereum/ethereum.service';
@@ -147,6 +148,11 @@ export class SqsConsumerService implements OnModuleInit, OnModuleDestroy {
       messageId: message.MessageId,
       blockNum: receivedMessage.blockNum,
     };
+
+    // if no tx found, it must be the infura haven't got tx yet, need throw this back to queue
+    if (error instanceof EmptyLogError) {
+      return;
+    }
 
     this.nftBlockTaskService.updateNFTBlockTask({
       ...nftBlockTask,

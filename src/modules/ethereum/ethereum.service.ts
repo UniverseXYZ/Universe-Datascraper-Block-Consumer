@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ethers } from 'ethers';
 import { ConfigService } from '@nestjs/config';
+import { EmptyLogError } from '../sqs-consumer/sqs-consumer.types';
 
 const ERC165ABI = [
   {
@@ -17,6 +18,7 @@ const ERC165ABI = [
 @Injectable()
 export class EthereumService {
   public ether: ethers.providers.BaseProvider;
+  private readonly logger = new Logger(EthereumService.name);
 
   constructor(private configService: ConfigService) {
     const network: ethers.providers.Networkish =
@@ -66,6 +68,11 @@ export class EthereumService {
 
   async getContractsInBlock(blockNum: number) {
     const block = await this.ether.getBlockWithTransactions(blockNum);
+    if (block?.transactions?.length === 0) {
+      this.logger.error('No transactions in block');
+      throw new EmptyLogError('No transactions found in this block');
+    }
+
     const transactions = block.transactions;
     const allAddress = transactions.map((transaction) => {
       return [transaction.from, transaction.to];
