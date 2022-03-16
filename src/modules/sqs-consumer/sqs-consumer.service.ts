@@ -149,17 +149,21 @@ export class SqsConsumerService implements OnModuleInit, OnModuleDestroy {
       blockNum: receivedMessage.blockNum,
     };
 
-    // if no tx found, it must be the infura haven't got tx yet, need throw this back to queue
+    let status = MessageStatus.error;
+    let errorMessage =
+      `Error type: [${type}] - ${error.stack || error.message}` ||
+      `Error type: [${type}] - ${JSON.stringify(error)}`;
+
+    // its possible for the block don't have any tx yet and we need persist it in this case and do manual check later
     if (error instanceof EmptyLogError) {
-      return;
+      status = MessageStatus.empty;
+      errorMessage = null; // no need of error message in this case
     }
 
     this.nftBlockTaskService.updateNFTBlockTask({
       ...nftBlockTask,
-      status: MessageStatus.error,
-      errorMessage:
-        `Error type: [${type}] - ${error.message}` ||
-        `Error type: [${type}] - ${JSON.stringify(error)}`,
+      status,
+      errorMessage,
     });
     this.deleteMessage(message);
   }
